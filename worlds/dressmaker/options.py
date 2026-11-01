@@ -18,135 +18,128 @@ from Options import Choice, OptionGroup, PerGameCommonOptions, Range, Toggle
 # A toggle is an option that can either be on or off. This will be represented by a checkbox on the website.
 # The default for a toggle is "off".
 # If you want a toggle to be on by default, you can use the "DefaultOnToggle" class instead of the "Toggle" class.
-class HardMode(Toggle):
+class GoalChoice(Choice):
     """
-    In hard mode, the basic enemy and the final boss will have more health.
-    The Health Upgrades become progression, as they are now required to beat the final boss.
+    Goal choices in order of how hard and long they take:
+    Pattern percentage: use a certain % of patterns in dresses to win. There are 155 patterns.
+    Fabric percentage: use a certain % of fabrics in dresses to win There are 363 fabrics.
+    Story: Complete the final 53rd commission, does not include pigeon quests as location. There are 54 commissions.
+    Complete EVERY commission: There's 78 of these bad boys, choose this one if you
+    REALLY want another 35+ hour playthrough. This one adds 24 pigeon commissions.
     """
 
     # The docstring of an option is used as the description on the website and in the template yaml.
 
     # You'll also want to set a display name, which will determine what the option is called on the website.
-    display_name = "Hard Mode"
+    display_name = "Win Condition"
+    option_pattern = 0
+    option_fabric = 1
+    option_main_story = 2
+    option_all_commissions = 3
+
+    default = option_pattern
 
 
-class Hammer(Toggle):
+class PatternGoalPercentage(Range):
     """
-    Adds another item to the itempool: The Hammer.
-    The top middle chest will now be locked behind a breakable wall, requiring the Hammer.
-    """
-
-    display_name = "Hammer"
-
-
-class ExtraStartingChest(Toggle):
-    """
-    Adds an extra chest in the bottom left, making room for an extra Confetti Cannon.
+    Percentage of patterns needed to be used in order to win. (if patterns was your goal)
     """
 
-    display_name = "Extra Starting Chest"
-
-
-class TrapChance(Range):
-    """
-    Percentage chance that any given Confetti Cannon will be replaced by a Math Trap.
-    """
-
-    display_name = "Trap Chance"
+    display_name = "Pattern Percentage Completion Requirement"
 
     range_start = 0
     range_end = 100
-    default = 0
+    default = 50
 
-
-class StartWithOneConfettiCannon(Toggle):
+class FabricGoalPercentage(Range):
     """
-    Start with a confetti cannon already in your inventory.
-    Why? Because you deserve it. You get to celebrate yourself without doing any work first.
+    Percentage of fabrics needed to be used in order to win. (if fabric was your goal)
     """
 
-    display_name = "Start With One Confetti Cannon"
-
-
-# A Range is a numeric option with a min and max value. This will be represented by a slider on the website.
-class ConfettiExplosiveness(Range):
-    """
-    How much confetti each use of a confetti cannon will fire.
-    """
-
-    display_name = "Confetti Explosiveness"
+    display_name = "Fabric Percentage Completion Requirement"
 
     range_start = 0
-    range_end = 10
+    range_end = 100
+    default = 50
 
-    # Range options must define an explicit default value.
+class StartingBodices(Range):
+    """
+    How many bodice patterns you want to start with.
+    """
+
+    display_name = "Starting Amount of Bodices"
+
+    range_start = 3
+    range_end = 30
+    default = 6
+
+class StartingSkirts(Range):
+    """
+    How many skirt patterns you want to start with.
+    """
+
+    display_name = "Starting Amount of Skirts"
+
+    range_start = 3
+    range_end = 30
+    default = 7
+
+class StartingSleeves(Range):
+    """
+    How many sleeve patterns you want to start with.
+    """
+
+    display_name = "Starting Amount of Sleeves"
+
+    range_start = 3
+    range_end = 15
+    default = 4
+
+class StartingCollars(Range):
+    """
+    How many collars you want to start with.
+    """
+
+    display_name = "Starting Amount of Collars"
+
+    range_start = 3
+    range_end = 10
     default = 3
 
-
-# A Choice is an option with multiple discrete choices. This will be represented by a dropdown on the website.
-class PlayerSprite(Choice):
+class StartingFabrics(Range):
     """
-    The sprite that the player will have.
+    How many fabrics you want to start unlocked with.
     """
 
-    display_name = "Player Sprite"
+    display_name = "Starting Amount of fabrics"
 
-    option_human = 0
-    option_duck = 1
-    option_horse = 2
-    option_cat = 3
-
-    # Choice options must define an explicit default value.
-    default = option_human
-
-    # For choices, you can also define aliases.
-    # For example, we could make it so "player_sprite: kitty" resolves to "player_sprite: cat" like this:
-    alias_kitty = option_cat
-
+    range_start = 23
+    range_end = 100
+    default = 23
 
 # We must now define a dataclass inheriting from PerGameCommonOptions that we put all our options in.
 # This is in the format "option_name_in_snake_case: OptionClassName".
 @dataclass
 class DressmakerOptions(PerGameCommonOptions):
-    hard_mode: HardMode
-    hammer: Hammer
-    extra_starting_chest: ExtraStartingChest
-    start_with_one_confetti_cannon: StartWithOneConfettiCannon
-    trap_chance: TrapChance
-    confetti_explosiveness: ConfettiExplosiveness
-    player_sprite: PlayerSprite
+    goal_choice: GoalChoice
+    fabric_goal_percentage: FabricGoalPercentage
+    pattern_goal_percentage: PatternGoalPercentage
+    starting_bodices: StartingBodices
+    starting_skirts: StartingSkirts
+    starting_sleeves: StartingSleeves
+    starting_collars: StartingCollars
+    starting_fabrics: StartingFabrics
 
 
 # If we want to group our options by similar type, we can do so as well. This looks nice on the website.
 option_groups = [
     OptionGroup(
-        "Gameplay Options",
-        [HardMode, Hammer, ExtraStartingChest, StartWithOneConfettiCannon, TrapChance],
+        "Goal Options",
+        [GoalChoice, FabricGoalPercentage, PatternGoalPercentage],
     ),
     OptionGroup(
-        "Aesthetic Options",
-        [ConfettiExplosiveness, PlayerSprite],
+        "Starting Options",
+        [StartingBodices, StartingSkirts, StartingSleeves, StartingCollars, StartingFabrics],
     ),
 ]
 
-# Finally, we can define some option presets if we want the player to be able to quickly choose a specific "mode".
-option_presets = {
-    "boring": {
-        "hard_mode": False,
-        "hammer": False,
-        "extra_starting_chest": False,
-        "start_with_one_confetti_cannon": False,
-        "trap_chance": 0,
-        "confetti_explosiveness": ConfettiExplosiveness.range_start,
-        "player_sprite": PlayerSprite.option_human,
-    },
-    "the true way to play": {
-        "hard_mode": True,
-        "hammer": True,
-        "extra_starting_chest": True,
-        "start_with_one_confetti_cannon": True,
-        "trap_chance": 50,
-        "confetti_explosiveness": ConfettiExplosiveness.range_end,
-        "player_sprite": PlayerSprite.option_duck,
-    },
-}
